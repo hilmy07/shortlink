@@ -1,0 +1,215 @@
+basePath: /
+definitions:
+  models.CreateUserRequest:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      profile_img:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Link:
+    properties:
+      id:
+        type: integer
+      original_url:
+        type: string
+      slug:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.RequestLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  title: Backend Shortlink
+  version: "1.0"
+paths:
+  /{slug}:
+    get:
+      description: Redirects a short link to the original URL
+      parameters:
+      - description: Short link slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: redirect
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Redirect to original URL
+      tags:
+      - Links
+  /api/links:
+    get:
+      description: Retrieve all links created by the logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all links of user
+      tags:
+      - Links
+    post:
+      consumes:
+      - application/json
+      description: Create a new short link for a user
+      parameters:
+      - description: Link data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Link'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create new short link
+      tags:
+      - Links
+  /api/links/{id}:
+    delete:
+      description: Delete a short link by its ID
+      parameters:
+      - description: Link ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a link
+      tags:
+      - Links
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user dengan email & password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RequestLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - Auth
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Register user baru
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register user
+      tags:
+      - Auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
