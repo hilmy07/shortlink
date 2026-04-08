@@ -9,7 +9,9 @@ function Navbar() {
         <div className="flex justify-between items-center">
           <div className="flex gap-12">
             <div>
-              <img src={logo} alt="logo" />
+              <Link to="/">
+                <img src={logo} alt="logo" />
+              </Link>
             </div>
             <div className="flex gap-4">
               <Link to="/dashboard">
