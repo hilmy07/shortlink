@@ -25,7 +25,7 @@ function Navbar() {
             </Link>
 
             <Link
-              to="/auth/new"
+              to="/auth"
               className="px-6 py-2 bg-[#004ac6] text-white rounded"
             >
               logout
