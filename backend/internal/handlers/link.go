@@ -19,31 +19,41 @@ func NewLinkHandler(service *service.LinkService) *LinkHandler {
 
 // Create Shortlink godoc
 // @Summary Create new short link
-// @Description Create a new short link for a user
+// @Description Create a new short link for a logged-in user
 // @Tags Links
 // @Accept json
 // @Produce json
-// @Param request body models.Link true "Link data"
+// @Param request body models.CreateLinkRequest true "Link data"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Security ApiKeyAuth
 // @Router /api/links [post]
 func (h *LinkHandler) Create(c *gin.Context) {
-	
-	req := models.Link{}
 
+	// ambil user_id dari JWT
+	userIdVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
+		return
+	}
+
+	userId := userIdVal.(int)
+
+	// bind request (tanpa user_id)
+	var req models.CreateLinkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
 
-	result, err := h.service.CreateLink(req.OriginalURL, req.Slug, req.UserID)
+	result, err := h.service.CreateLink(req.OriginalURL, req.Slug, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": "Slug already taken",
-				"results": nil,
-			})
+			"success": false,
+			"message": "Slug already taken",
+			"results": nil,
+		})
 		return
 	}
 

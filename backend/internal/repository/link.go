@@ -69,10 +69,9 @@ func (r *LinkRepository) GetBySlug(slug string) (models.Link, error) {
 	return link, err
 }
 
-// repository
 func (r *LinkRepository) GetLinksByUserId(userId int) ([]*models.ResponseLinkByUserId, error) {
 	rows, err := r.db.Query(context.Background(),
-		`SELECT u.email, l.original_url 
+		`SELECT u.email, l.original_url, l.slug
 		 FROM links l 
 		 JOIN users u ON u.id = l.user_id 
 		 WHERE l.user_id=$1`, userId)
@@ -81,15 +80,25 @@ func (r *LinkRepository) GetLinksByUserId(userId int) ([]*models.ResponseLinkByU
 	}
 	defer rows.Close()
 
-	links, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.ResponseLinkByUserId])
+	// struct sementara
+	type temp struct {
+		Email       string
+		OriginalURL string
+		Slug        string
+	}
+
+	raw, err := pgx.CollectRows(rows, pgx.RowToStructByPos[temp])
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert []models.ResponseLinkByUserId → []*models.ResponseLinkByUserId
-	result := make([]*models.ResponseLinkByUserId, len(links))
-	for i := range links {
-		result[i] = &links[i]
+	result := make([]*models.ResponseLinkByUserId, len(raw))
+	for i, v := range raw {
+		result[i] = &models.ResponseLinkByUserId{
+			Email:       v.Email,
+			OriginalURL: v.OriginalURL,
+			ShortLink:   "http://localhost:8000/" + v.Slug,
+		}
 	}
 
 	return result, nil

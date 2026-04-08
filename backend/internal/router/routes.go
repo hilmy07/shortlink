@@ -35,7 +35,7 @@ func SetupRoutes(r *gin.Engine, db *pgxpool.Pool) {
 	r.GET("/api/links", middleware.AuthMiddleware(), linkHandler.GetUserLinks)
 	r.DELETE("/api/links/:id", middleware.AuthMiddleware(), linkHandler.DeleteLink)
 
-	r.POST("/api/links", linkHandler.Create)
+	r.POST("/api/links", middleware.AuthMiddleware(), linkHandler.Create)
 	r.GET("/:slug", linkHandler.Redirect) 
 
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

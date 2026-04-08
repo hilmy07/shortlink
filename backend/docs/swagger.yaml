@@ -1,5 +1,15 @@
 basePath: /
 definitions:
+  models.CreateLinkRequest:
+    properties:
+      original_url:
+        type: string
+      slug:
+        type: string
+    required:
+    - original_url
+    - slug
+    type: object
   models.CreateUserRequest:
     properties:
       address:
@@ -18,17 +28,6 @@ definitions:
         type: string
       updated_at:
         type: string
-    type: object
-  models.Link:
-    properties:
-      id:
-        type: integer
-      original_url:
-        type: string
-      slug:
-        type: string
-      user_id:
-        type: integer
     type: object
   models.RequestLogin:
     properties:
@@ -93,14 +92,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new short link for a user
+      description: Create a new short link for a logged-in user
       parameters:
       - description: Link data
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.Link'
+          $ref: '#/definitions/models.CreateLinkRequest'
       produces:
       - application/json
       responses:
@@ -111,6 +110,12 @@ paths:
             type: object
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
