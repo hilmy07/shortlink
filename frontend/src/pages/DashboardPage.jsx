@@ -29,11 +29,33 @@ function DashboardPage() {
     };
 
     fetchLinks();
-  }, []);
+  }, [links]);
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
     alert("Copied!");
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`http://localhost:8000/api/links/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setLinks((prev) => prev.filter((item) => item.id !== id));
+      }
+      alert("Deleted successfully!");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -64,8 +86,8 @@ function DashboardPage() {
       {/* section 2 */}
       <section>
         <div className="px-90 mt-6 pb-6">
-          {links.map((item, index) => (
-            <div key={index} className="bg-white p-6 rounded mt-6">
+          {links.map((item) => (
+            <div key={item.id} className="bg-white p-6 rounded mt-6">
               {/* short link */}
               <Link
                 to={item.short_url}
@@ -90,7 +112,10 @@ function DashboardPage() {
                   </button>
 
                   {/* delete */}
-                  <button className="p-2 shadow rounded cursor-pointer">
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="p-2 shadow rounded cursor-pointer"
+                  >
                     <RiDeleteBin6Line />
                   </button>
                 </div>
