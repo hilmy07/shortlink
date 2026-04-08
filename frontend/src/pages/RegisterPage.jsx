@@ -1,8 +1,48 @@
 import React from "react";
 import logo from "../assets/shortlink.png";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+import http from "../lib/http";
 
 function RegisterPage() {
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm({
+    mode: "onSubmit",
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onSubmit = async (data) => {
+    try {
+      const body = await http("/api/register", null, {
+        method: "POST",
+        body: {
+          email: data.email,
+          password: data.password,
+        },
+      });
+
+      if (!body.success) {
+        throw new Error(body.message || "Register gagal");
+      }
+
+      alert("Register berhasil!");
+      navigate("/auth");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Register error!");
+    }
+  };
+
   return (
     <>
       <main className="min-h-screen bg-[#F3F4F6]">
@@ -16,7 +56,7 @@ function RegisterPage() {
         </div>
 
         <div className="bg-white w-100 mt-4 ml-142 px-6 py-2 rounded-xl shadow">
-          <form action="">
+          <form onSubmit={handleSubmit(onSubmit)}>
             {/* Email */}
             <div className="mt-6">
               <label htmlFor="email">Email Address</label>
@@ -25,7 +65,9 @@ function RegisterPage() {
                 type="email"
                 id="email"
                 placeholder="input your mail"
+                {...register("email", { required: "Email wajib diisi" })}
                 className="border border-[#c3c6d7] rounded w-88 p-2"
+                error={errors.email?.message}
               />
             </div>
 
@@ -35,7 +77,15 @@ function RegisterPage() {
               <input
                 type="password"
                 id="password"
+                {...register("password", {
+                  required: "Password wajib diisi",
+                  minLength: {
+                    value: 6,
+                    message: "Minimal 6 karakter",
+                  },
+                })}
                 className="border border-[#c3c6d7] rounded w-88 p-2"
+                error={errors.password?.message}
               />
             </div>
 
@@ -44,11 +94,20 @@ function RegisterPage() {
               <input
                 type="password"
                 id="password"
+                {...register("confirmPassword", {
+                  required: "Confirm password wajib diisi",
+                  validate: (value) =>
+                    value === getValues("password") || "Password tidak sama",
+                })}
                 className="border border-[#c3c6d7] rounded w-88 p-2"
+                error={errors.confirmPassword?.message}
               />
             </div>
 
-            <button className="bg-[#004ac6] text-white px-6 py-2 rounded mt-6 mb-4 w-88">
+            <button
+              type="submit"
+              className="bg-[#004ac6] text-white px-6 py-2 rounded mt-6 mb-4 w-88"
+            >
               Sign Up
             </button>
 

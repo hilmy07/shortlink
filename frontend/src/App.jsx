@@ -4,7 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/Homepage";
-import RegisterPage from "./pages/Registerpage";
+import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import CreateLinkPage from "./pages/CreateLinkPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -41,7 +41,7 @@ function App() {
       element: <RegisterPage />,
     },
     {
-      path: "/notfound",
+      path: "*",
       element: <NotFoundPage />,
     },
   ]);

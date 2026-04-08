@@ -1,9 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../assets/shortlink.png";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import google from "../assets/google.png";
+import { useForm } from "react-hook-form";
+import http from "../lib/http";
 
 function LoginPage() {
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    setError("");
+
+    try {
+      const body = await http("/api/login", null, {
+        method: "POST",
+        body: {
+          email: data.email,
+          password: data.password,
+        },
+      });
+
+      if (!body.success) {
+        throw new Error(body.message || "Login gagal");
+      }
+
+      localStorage.setItem("token", body.result.token);
+      alert("Login berhasil!");
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Register error!");
+    }
+  };
+
   return (
     <>
       <main className="min-h-screen bg-[#F3F4F6]">
@@ -15,7 +51,7 @@ function LoginPage() {
           <h1 className="text-xl font-bold">Welcome back</h1>
           <p>Please enter your details to sign in</p>
 
-          <form action="">
+          <form onSubmit={handleSubmit(onSubmit)}>
             {/* Email */}
             <div className="mt-6">
               <label htmlFor="email">Email Address</label>
@@ -25,7 +61,17 @@ function LoginPage() {
                 id="email"
                 placeholder="input your mail"
                 className="border border-[#c3c6d7] rounded w-88 p-2"
+                {...register("email", {
+                  required: "Email wajib diisi",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Format email tidak valid",
+                  },
+                })}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -43,7 +89,21 @@ function LoginPage() {
                 type="password"
                 id="password"
                 className="border border-[#c3c6d7] rounded w-88 p-2"
+                {...register("password", {
+                  required: "Password wajib diisi",
+                  minLength: {
+                    value: 4,
+                    message: "Password minimal 4 karakter",
+                  },
+                })}
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
+              )}
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
             </div>
 
             <button className="bg-[#004ac6] text-white px-6 py-2 rounded mt-6 w-88">
